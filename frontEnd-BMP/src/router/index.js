@@ -4,6 +4,7 @@ import AnDetailView from '../views/AnDetailView.vue'
 import AnAddView from '../views/AnAddView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import AnEdit from '../components/AnEdit.vue'
+import AllUserView from '../views/AllUserView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +32,11 @@ const router = createRouter({
       path: '/admin/announcement/:id/edit',
       name: 'editDetail',
       component: AnEdit
+    },
+    {
+      path: '/announcement',
+      name: 'announcement',
+      component: AllUserView
     },
     {
       path: '/:catchNotMatchPath(.*)',
