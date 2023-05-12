@@ -26,7 +26,7 @@ import MakiDanger11Vue from './MakiDanger11.vue'
 
     const allAnnouncements = async() => {
         isFetch.value = true
-    const res = await fetch(`${fetchback}/api/announcements?mode=admin`)
+    const res = await fetch(`${fetchback}/api/announcements`)
     try{
         if(res.ok){
             const all = await res.json()

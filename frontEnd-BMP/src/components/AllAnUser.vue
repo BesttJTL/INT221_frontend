@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from 'vue';
+import { onBeforeMount, reactive, ref} from 'vue';
+import MakiDanger11Vue from './MakiDanger11.vue'
 const fetchback = import.meta.env.VITE_ROOT_API
 const isFetch = ref(true);
 const isFetchFailed = ref(false)
-import MakiDanger11Vue from './MakiDanger11.vue'
+
     // Fetching Timeout in 10 seconds (if exceed or more will hide)
     const fetchTimeout = () =>{
         setTimeout(() => {
@@ -17,6 +18,43 @@ import MakiDanger11Vue from './MakiDanger11.vue'
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+    onBeforeMount(async()=>{
+        await allUserAnnouncement('active')
+    })
+
+    const showUserAllAnnouncement = reactive([])
+
+    const allUserAnnouncement = async(x) => {
+        isFetch.value = true
+        const res = await fetch(`${fetchback}/api/announcements?mode=${x}`)
+        try{
+            if(res.ok){
+                const all = await res.json()
+                showUserAllAnnouncement.push(...all)
+                isFetch.value = false
+            }
+        }
+        catch(err){
+            alert(err)
+        }
+    }
+
+    const checkUIShow = ref(false)
+    const uiShowButton = ref('Closed Announcements')
+
+    const changeView = async() => {
+        showUserAllAnnouncement.length = 0 
+        checkUIShow.value = !checkUIShow.value
+        if(checkUIShow.value === true){
+            await allUserAnnouncement('close')
+            uiShowButton.value = 'Active Announcements'
+        }
+        else{
+            await allUserAnnouncement('active')
+            uiShowButton.value = 'Closed Announcements'
+        }
+    }
+ 
 </script>
  
 <template>
@@ -40,30 +78,33 @@ import MakiDanger11Vue from './MakiDanger11.vue'
             <p class="pl-1 text-md font-normal"> <span class="text-[#24BB78]">{{ timezone }}</span></p>
         </div>
         <div class="w-1/2 flex justify-end">
-            <button class="ann-button bg-transparent hover:bg-[#24e78f] text-[#24e78f] font-semibold hover:text-black py-2 px-4 border border-[#24e78f] hover:border-transparent rounded duration-200 mr-5">
-                    Closed Announcement
+            <button class="ann-button bg-transparent hover:bg-[#24e78f] text-[#24e78f] font-semibold hover:text-black py-2 px-4 border border-[#24e78f] hover:border-transparent rounded duration-200 mr-5" @click="changeView">
+                    {{ uiShowButton }}
             </button>
         </div>
      </div>
     
      <div>
-        <div v-if="false" class="pt-5 pl-5 w-screen h-full">
+        <div v-if="showUserAllAnnouncement.length === 0" class="pt-5 pl-5 w-screen h-full">
                 <p class="text-red-500 text-3xl font-medium text-center mt-36">No Announcement</p>
         </div>
+
         <div v-else class="p-5 w-full h-full bg-[#1C191C]">
                 <table class="w-full h-full">
                     <thead>
                     <tr class="border-grey-300 border-b rounded-2xl h-14">
                         <th class="text-center w-1/12">No</th>
-                        <th class="text-start w-9/12">Title</th>
-                        <th class="text-start w-2/12">Category</th>
+                        <th class="text-start w-7/12">Title</th>
+                        <th class="text-start w-2/12" v-if="checkUIShow">Closed Date</th>
+                        <th class="text-start w-1/12">Category</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="ann-item h-20 border-b border-grey">
-                        <td class="text-center">dd</td>
-                        <td class="ann-title">dd</td>
-                        <td class="ann-category">dd</td>
+                    <tr class="ann-item h-20 border-b border-grey" v-for="(showUser, index) in showUserAllAnnouncement" :key="showUser.announcementId">
+                        <td class="text-center">{{ index + 1 }}</td>
+                        <td class="ann-title"><router-link :to="{ name: 'userDetailAnnouncement', params: { id: showUser.announcementId}}" >{{ showUser.announcementTitle }}</router-link></td>
+                        <td class="ann-close-date" v-if="checkUIShow">{{ new Date(showUser.closeDate).toLocaleString("en-GB",{dateStyle: "medium", timeStyle: "short"})  }}</td>
+                        <td class="ann-category">{{ showUser.announcementCategory }}</td>
                     </tr>
                 </tbody>
                 </table>
