@@ -1,19 +1,23 @@
 <script setup>
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, defineProps } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { getMode } from '../stores/getMode';
+const mode = getMode()
 const fetchback = import.meta.env.VITE_ROOT_API
 const { params } = useRoute()
-const router = useRouter()  
+const router = useRouter() 
+
 
     const showToUser = ref([])
 
     onBeforeMount(async() => {
-        showToUser.value = await getUserDetail()
+        showToUser.value = await getUserDetail(mode.setMode)
         // console.log(showToUser.value)
+        
     })
 
-    const getUserDetail = async() => {
-        const res = await fetch(`${fetchback}/api/announcements/${params.id}?mode=active`)
+    const getUserDetail = async(x) => {
+        const res = await fetch(`${fetchback}/api/announcements/${params.id}?mode=${x}`)
         try{
             if(res.ok){
                 const show = await res.json()
@@ -41,7 +45,7 @@ const router = useRouter()
                 <div class="flex justify-start w-1/2">
                     <span class="ann-category font-semibold text-md text-gray-300">{{ showToUser.announcementCategory }}</span>
                 </div>
-                <div class="flex justify-end w-1/2" v-if="true">
+                <div class="flex justify-end w-1/2" v-if="mode.setMode === 'close'">
                     <span class="font-semibold text-md text-red-400">Closed on:</span>
                     <span class="ann-close-date pl-2 font-semibold text-gray-300">{{ showToUser.closeDate }}</span>
                 </div>

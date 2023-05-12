@@ -1,10 +1,12 @@
 <script setup>
-import { onBeforeMount, reactive, ref} from 'vue';
+import { onBeforeMount, onMounted, reactive, ref} from 'vue';
 import MakiDanger11Vue from './MakiDanger11.vue'
+import { getMode } from '../stores/getMode';
+const mode = getMode()
 const fetchback = import.meta.env.VITE_ROOT_API
 const isFetch = ref(true);
 const isFetchFailed = ref(false)
-
+const propsMode = ref('active')
     // Fetching Timeout in 10 seconds (if exceed or more will hide)
     const fetchTimeout = () =>{
         setTimeout(() => {
@@ -18,8 +20,8 @@ const isFetchFailed = ref(false)
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    onBeforeMount(async()=>{
-        await allUserAnnouncement('active')
+    onMounted(async() => {
+        await allUserAnnouncement(mode.setMode)
     })
 
     const showUserAllAnnouncement = reactive([])
@@ -43,14 +45,19 @@ const isFetchFailed = ref(false)
     const uiShowButton = ref('Closed Announcements')
 
     const changeView = async() => {
+        
         showUserAllAnnouncement.length = 0 
         checkUIShow.value = !checkUIShow.value
         if(checkUIShow.value === true){
-            await allUserAnnouncement('close')
+            // await allUserAnnouncement('close')
+            mode.getSetMode('close')
+            await allUserAnnouncement(mode.setMode)
             uiShowButton.value = 'Active Announcements'
         }
         else{
-            await allUserAnnouncement('active')
+            // await allUserAnnouncement('active')
+            mode.getSetMode('active')
+            await allUserAnnouncement(mode.setMode)
             uiShowButton.value = 'Closed Announcements'
         }
     }
@@ -102,7 +109,7 @@ const isFetchFailed = ref(false)
                 <tbody>
                     <tr class="ann-item h-20 border-b border-grey" v-for="(showUser, index) in showUserAllAnnouncement" :key="showUser.announcementId">
                         <td class="text-center">{{ index + 1 }}</td>
-                        <td class="ann-title"><router-link :to="{ name: 'userDetailAnnouncement', params: { id: showUser.announcementId}}" >{{ showUser.announcementTitle }}</router-link></td>
+                        <td class="ann-title"><router-link :to="{ name: 'userDetailAnnouncement', params: { id: showUser.announcementId}}" :mode="propsMode">{{ showUser.announcementTitle }}</router-link></td>
                         <td class="ann-close-date" v-if="checkUIShow">{{ new Date(showUser.closeDate).toLocaleString("en-GB",{dateStyle: "medium", timeStyle: "short"})  }}</td>
                         <td class="ann-category">{{ showUser.announcementCategory }}</td>
                     </tr>
