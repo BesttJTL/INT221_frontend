@@ -40,7 +40,7 @@ const fetchback = import.meta.env.VITE_ROOT_API
         <p class="border-b-2 border-white"></p>
         <div class="flex flex-row p-5 ml-8 w-5/6 h-auto text-start">
            <div class="ann-details flex flex-col gap-y-5 shadow-slate-400">
-            <p class="ann-category border-2 border-blue-300 rounded-xl p-1 w-28 h-10 flex justify-center break-words pt-1">
+            <p class="ann-category border-2 border-blue-300 rounded-xl p-1 w-36 h-12 text-center flex justify-center break-words pt-1 p-3">
                 {{ showOneDetail.announcementCategory }}</p>
                <div class="heading-body flex flex-col gap-y-1">
                    <p class="ann-title font-bold text-xl">{{ showOneDetail.announcementTitle }} 
