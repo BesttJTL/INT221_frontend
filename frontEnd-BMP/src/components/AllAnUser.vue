@@ -117,7 +117,7 @@ const propsMode = ref('active')
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="ann-item h-20 border-b border-grey" v-for="(showUser, index) in showUserAllAnnouncement" :key="showUser.announcementId">
+                    <tr class="ann-item h-20 border-b border-gray" v-for="(showUser, index) in showUserAllAnnouncement" :key="showUser.announcementId">
                         <td class="text-center">{{ index + 1 }}</td>
                         <td class="ann-title"><router-link :to="{ name: 'userDetailAnnouncement', params: { id: showUser.announcementId}}" :mode="propsMode">{{ showUser.announcementTitle }}</router-link></td>
                         <td class="ann-close-date" v-if="mode.setMode === 'close'">{{ new Date(showUser.closeDate).toLocaleString("en-GB",{dateStyle: "medium", timeStyle: "short"})  }}</td>
@@ -125,6 +125,11 @@ const propsMode = ref('active')
                     </tr>
                 </tbody>
                 </table>
+
+                <div class=" mt-5 flex flex-row w-auto h-12 bg-transparent text-[#24e78f] font-semibold text-md border border-[#24e78f] rounded">
+                    <button class="w-20 hover:bg-[#24e78f] hover:text-black hover:border-transparent duration-200">Prev</button>  
+                    <button class="w-20 hover:bg-[#24e78f] hover:text-black hover:border-transparent duration-200">Next</button>   
+                </div>
         </div>
     </div>
 </div>
