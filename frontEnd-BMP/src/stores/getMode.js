@@ -4,10 +4,14 @@ import { useLocalStorage } from '@vueuse/core'
 
 export const getMode = defineStore('mode', () => {
     const setMode = useLocalStorage('mode','active')
+    const checkUishow = useLocalStorage('uiShow', false)
     const getSetMode = (X) => {
         setMode.value = X
     }
-    return { setMode, getSetMode }
+    const setUishow = () => {
+        checkUishow.value = !checkUishow.value
+    } 
+    return { setMode, getSetMode, checkUishow, setUishow }
 })
 
 // if (import.meta.hot) {

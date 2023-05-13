@@ -22,6 +22,11 @@ const propsMode = ref('active')
 
     onMounted(async() => {
         await allUserAnnouncement(mode.setMode)
+        if(mode.setMode === 'close'){
+            uiShowButton.value = 'Active Announcements'
+        }else {
+            uiShowButton.value = 'Closed Announcements'
+        }
     })
 
     const showUserAllAnnouncement = reactive([])
@@ -41,24 +46,29 @@ const propsMode = ref('active')
         }
     }
 
-    const checkUIShow = ref(false)
+ 
     const uiShowButton = ref('Closed Announcements')
 
     const changeView = async() => {
         
         showUserAllAnnouncement.length = 0 
-        checkUIShow.value = !checkUIShow.value
-        if(checkUIShow.value === true){
+        mode.setUishow()
+        if(mode.checkUishow === true){
             // await allUserAnnouncement('close')
             mode.getSetMode('close')
             await allUserAnnouncement(mode.setMode)
-            uiShowButton.value = 'Active Announcements'
+            if(mode.setMode === 'close'){
+                uiShowButton.value = 'Active Announcements'
+            }
+            
         }
-        else{
+        else {
             // await allUserAnnouncement('active')
             mode.getSetMode('active')
             await allUserAnnouncement(mode.setMode)
-            uiShowButton.value = 'Closed Announcements'
+            if(mode.setMode === 'active'){
+                uiShowButton.value = 'Closed Announcements'
+            }
         }
     }
  
@@ -102,7 +112,7 @@ const propsMode = ref('active')
                     <tr class="border-grey-300 border-b rounded-2xl h-14">
                         <th class="text-center w-1/12">No</th>
                         <th class="text-start w-7/12">Title</th>
-                        <th class="text-start w-2/12" v-if="checkUIShow">Closed Date</th>
+                        <th class="text-start w-2/12" v-if="mode.setMode === 'close'">Closed Date</th>
                         <th class="text-start w-1/12">Category</th>
                     </tr>
                 </thead>
@@ -110,7 +120,7 @@ const propsMode = ref('active')
                     <tr class="ann-item h-20 border-b border-grey" v-for="(showUser, index) in showUserAllAnnouncement" :key="showUser.announcementId">
                         <td class="text-center">{{ index + 1 }}</td>
                         <td class="ann-title"><router-link :to="{ name: 'userDetailAnnouncement', params: { id: showUser.announcementId}}" :mode="propsMode">{{ showUser.announcementTitle }}</router-link></td>
-                        <td class="ann-close-date" v-if="checkUIShow">{{ new Date(showUser.closeDate).toLocaleString("en-GB",{dateStyle: "medium", timeStyle: "short"})  }}</td>
+                        <td class="ann-close-date" v-if="mode.setMode === 'close'">{{ new Date(showUser.closeDate).toLocaleString("en-GB",{dateStyle: "medium", timeStyle: "short"})  }}</td>
                         <td class="ann-category">{{ showUser.announcementCategory }}</td>
                     </tr>
                 </tbody>
