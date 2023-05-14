@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onMounted, reactive, ref} from 'vue';
+import { onBeforeMount, onMounted, reactive, ref, watch} from 'vue';
 import MakiDanger11Vue from './MakiDanger11.vue'
 import { getMode } from '../stores/getMode';
 const mode = getMode()
@@ -19,9 +19,11 @@ const propsMode = ref('active')
     fetchTimeout()
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const showIndex = ref(0)
 
     onMounted(async() => {
-        await allUserAnnouncement(mode.setMode)
+        // await allUserAnnouncement(mode.setMode)
+        await getPageAnnouncement(mode.setMode,mode.getPageNumber)
         if(mode.setMode === 'close'){
             uiShowButton.value = 'Active Announcements'
         }else {
@@ -31,14 +33,37 @@ const propsMode = ref('active')
 
     const showUserAllAnnouncement = reactive([])
 
-    const allUserAnnouncement = async(x) => {
+    // const allUserAnnouncement = async(x) => {
+    //     isFetch.value = true
+    //     const res = await fetch(`${fetchback}/api/announcements?mode=${x}`)
+    //     try{
+    //         if(res.ok){
+    //             const all = await res.json()
+    //             showUserAllAnnouncement.push(...all)
+    //             isFetch.value = false
+    //         }
+    //     }
+    //     catch(err){
+    //         alert(err)
+    //     }
+    // }
+    const getTotal = ref(false)
+    const getButton = ref(0)
+
+    const getPageAnnouncement = async(x,y) => {
         isFetch.value = true
-        const res = await fetch(`${fetchback}/api/announcements?mode=${x}`)
+        const res = await fetch(`${fetchback}/api/announcements/pages?mode=${x}&page=${y}`)
         try{
             if(res.ok){
                 const all = await res.json()
-                showUserAllAnnouncement.push(...all)
+                showIndex.value = mode.getPageNumber*5
+                if(all[0].totalElements > 5){
+                    getTotal.value = true
+                    getButton.value = all[0].totalPages
+                }
+                showUserAllAnnouncement.push(...all[0].content)
                 isFetch.value = false
+                console.log(showUserAllAnnouncement)
             }
         }
         catch(err){
@@ -56,7 +81,8 @@ const propsMode = ref('active')
         if(mode.checkUishow === true){
             // await allUserAnnouncement('close')
             mode.getSetMode('close')
-            await allUserAnnouncement(mode.setMode)
+            // await allUserAnnouncement(mode.setMode)
+            await getPageAnnouncement(mode.setMode,mode.getPageNumber)
             if(mode.setMode === 'close'){
                 uiShowButton.value = 'Active Announcements'
             }
@@ -65,13 +91,51 @@ const propsMode = ref('active')
         else {
             // await allUserAnnouncement('active')
             mode.getSetMode('active')
-            await allUserAnnouncement(mode.setMode)
+            // await allUserAnnouncement(mode.setMode)
+            await getPageAnnouncement(mode.setMode,mode.getPageNumber)
             if(mode.setMode === 'active'){
                 uiShowButton.value = 'Closed Announcements'
             }
         }
     }
- 
+
+    const disablePrev = ref(false)
+    const disableNext = ref(false)
+    const activeButton = ref(null)
+
+    const getId = async(e,num) => {
+        mode.setGetPage(num-1)
+        showUserAllAnnouncement.length = 0 
+        await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+        activeButton.value = num;
+    }
+
+    watch(() => mode.getPageNumber, (x) => {
+        if(x !== 0){
+            disablePrev.value = true
+        } else if(x === 0){
+            disablePrev.value = false
+        }
+        
+        if(x !== getButton.value-1){
+            disableNext.value = false
+        } else {
+            disableNext.value = true
+        }
+    })
+
+
+    const nextPage = async() => {
+      mode.setGetPage(mode.getPageNumber+1)
+      showUserAllAnnouncement.length = 0
+      await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+}
+
+const prevPage = async() => {
+      mode.setGetPage(mode.getPageNumber-1)
+      showUserAllAnnouncement.length = 0
+      await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+}
 </script>
  
 <template>
@@ -117,18 +181,20 @@ const propsMode = ref('active')
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="ann-item h-20 border-b border-gray" v-for="(showUser, index) in showUserAllAnnouncement" :key="showUser.announcementId">
-                        <td class="text-center">{{ index + 1 }}</td>
-                        <td class="ann-title"><router-link :to="{ name: 'userDetailAnnouncement', params: { id: showUser.announcementId}}" :mode="propsMode">{{ showUser.announcementTitle }}</router-link></td>
+                    <tr class="ann-item h-20 border-b border-gray" v-for="(showUser, index) in showUserAllAnnouncement" :key="showUser.id" >
+                        <td class="text-center">{{ showIndex + index + 1 }}</td>
+                        <td class="ann-title"><router-link :to="{ name: 'userDetailAnnouncement', params: { id: showUser.id}}" :mode="propsMode">{{ showUser.announcementTitle }}</router-link></td>
                         <td class="ann-close-date" v-if="mode.setMode === 'close'">{{ new Date(showUser.closeDate).toLocaleString("en-GB",{dateStyle: "medium", timeStyle: "short"})  }}</td>
                         <td class="ann-category">{{ showUser.announcementCategory }}</td>
                     </tr>
                 </tbody>
                 </table>
-                <div class="flex justify-end mt-5">
-    <button class="w-20 mr-2 hover:bg-[#24e78f] hover:text-black hover:border-transparent duration-200 border-2 rounded-md border-gray-300 py-1 px-2">Prev</button>  
-    <button class="w-20 hover:bg-[#24e78f] hover:text-black hover:border-transparent duration-200 border-2 rounded-md border-gray-300 py-1 px-2">Next</button>   
-  </div>
+                <div class="flex justify-start mt-5" v-if="getTotal">
+                 <button class="w-20 mr-2 rounded-md border-gray-300 py-1 px-2" :disabled="!disablePrev" @click="prevPage">Prev</button>
+                 <button class="w-20 border-gray-300 py-1 px-2" 
+                 v-for="num in getButton" :key="num" @click="getId($event,num)" :class="{ 'bg-blue-500': activeButton === num }">{{ num }}</button>
+                 <button class="w-20 rounded-md border-gray-300 py-1 px-2" :disabled="disableNext" @click="nextPage">Next</button>   
+               </div>
         </div>
     </div>
 </div>
@@ -141,5 +207,8 @@ td{
 tr:hover{
     background-color:rgb(36, 231, 143,0.05) ;
     transition-duration: 200ms;
+}
+.num {
+    background-color:#24e78f;
 }
 </style>
