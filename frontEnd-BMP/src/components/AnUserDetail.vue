@@ -47,7 +47,7 @@ const router = useRouter()
                 </div>
                 <div class="flex justify-end w-1/2" v-if="mode.setMode === 'close'">
                     <span class="font-semibold text-md text-red-400">Closed on:</span>
-                    <span class="ann-close-date pl-2 font-semibold text-gray-300">{{ showToUser.closeDate }}</span>
+                    <span class="ann-close-date pl-2 font-semibold text-gray-300">{{ new Date(showToUser.closeDate).toLocaleString("en-GB",{dateStyle: "medium", timeStyle: "short"})  }}</span>
                 </div>
             </div>
             <p class="ann-description font-normal text-md">{{ showToUser.announcementDescription }}</p>

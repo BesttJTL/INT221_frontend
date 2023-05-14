@@ -125,11 +125,10 @@ const propsMode = ref('active')
                     </tr>
                 </tbody>
                 </table>
-
-                <div class=" mt-5 flex flex-row w-auto h-12 bg-transparent text-[#24e78f] font-semibold text-md border border-[#24e78f] rounded">
-                    <button class="w-20 hover:bg-[#24e78f] hover:text-black hover:border-transparent duration-200">Prev</button>  
-                    <button class="w-20 hover:bg-[#24e78f] hover:text-black hover:border-transparent duration-200">Next</button>   
-                </div>
+                <div class="flex justify-end mt-5">
+    <button class="w-20 mr-2 hover:bg-[#24e78f] hover:text-black hover:border-transparent duration-200 border-2 rounded-md border-gray-300 py-1 px-2">Prev</button>  
+    <button class="w-20 hover:bg-[#24e78f] hover:text-black hover:border-transparent duration-200 border-2 rounded-md border-gray-300 py-1 px-2">Next</button>   
+  </div>
         </div>
     </div>
 </div>
