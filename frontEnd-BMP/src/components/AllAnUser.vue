@@ -29,6 +29,9 @@ const propsMode = ref('active')
         }else {
             uiShowButton.value = 'Closed Announcements'
         }
+        //fix
+        let num = (mode.getPageNumber+1)-10
+        await checkButtonPage(getButton.value,num)
     })
 
     const showUserAllAnnouncement = reactive([])
@@ -63,13 +66,13 @@ const propsMode = ref('active')
                 }
                 showUserAllAnnouncement.push(...all[0].content)
                 isFetch.value = false
-                console.log(showUserAllAnnouncement)
             }
         }
         catch(err){
             alert(err)
         }
     }
+    
 
  
     const uiShowButton = ref('Closed Announcements')
@@ -129,12 +132,31 @@ const propsMode = ref('active')
       mode.setGetPage(mode.getPageNumber+1)
       showUserAllAnnouncement.length = 0
       await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+      if(mode.getPageNumber >= showButton[showButton.length-1]){
+        let num = (mode.getPageNumber+1)-10
+        await checkButtonPage(getButton.value,num)
+      }
 }
 
 const prevPage = async() => {
       mode.setGetPage(mode.getPageNumber-1)
       showUserAllAnnouncement.length = 0
       await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+      if(mode.getPageNumber <= showButton[0]){
+        await checkButtonPage(getButton.value,mode.getPageNumber)
+      }
+}
+
+const showButton = reactive([])
+
+const checkButtonPage = async(x,y) => {
+    showButton.length = 0
+    let num = 10 + y
+    for(let i = y+1 ; i <= x+y ; ++i){
+            if(i <= num){
+            showButton.push(i)
+            }
+        }
 }
 </script>
  
@@ -192,7 +214,7 @@ const prevPage = async() => {
                 <div class="flex justify-start mt-5" v-if="getTotal">
                  <button class="w-20 mr-2 rounded-md border-gray-300 py-1 px-2" :disabled="!disablePrev" @click="prevPage">Prev</button>
                  <button class="w-20 border-gray-300 py-1 px-2" 
-                 v-for="num in getButton" :key="num" @click="getId($event,num)" :class="{ 'bg-blue-500': activeButton === num }">{{ num }}</button>
+                 v-for="num in showButton" :key="num" @click="getId($event,num)" :class="{ 'bg-blue-500': activeButton === num }">{{ num }}</button>
                  <button class="w-20 rounded-md border-gray-300 py-1 px-2" :disabled="disableNext" @click="nextPage">Next</button>   
                </div>
         </div>
