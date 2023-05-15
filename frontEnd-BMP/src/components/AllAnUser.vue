@@ -30,8 +30,7 @@ const propsMode = ref('active')
             uiShowButton.value = 'Closed Announcements'
         }
         //fix
-        let num = (mode.getPageNumber+1)-10
-        await checkButtonPage(getButton.value,num)
+        await chcekModeButton()
     })
 
     const showUserAllAnnouncement = reactive([])
@@ -59,10 +58,13 @@ const propsMode = ref('active')
         try{
             if(res.ok){
                 const all = await res.json()
+                console.log(all[0].totalPages)
                 showIndex.value = mode.getPageNumber*5
                 if(all[0].totalElements > 5){
                     getTotal.value = true
                     getButton.value = all[0].totalPages
+                }else{
+                    getTotal.value = false
                 }
                 showUserAllAnnouncement.push(...all[0].content)
                 isFetch.value = false
@@ -72,13 +74,27 @@ const propsMode = ref('active')
             alert(err)
         }
     }
-    
 
- 
+    const chcekModeButton = async() => {
+        showButton.length = 0
+        if(getTotal.value === true){
+            if(mode.getPageNumber > 9){
+            let num = (mode.getPageNumber+1)-10
+            await checkButtonPage(getButton.value,num)
+        } 
+        if(mode.getPageNumber < 9){
+            for(let i = 1 ; i <= getButton.value ; ++i){
+            if(i <= 10){
+            showButton.push(i)
+            }
+        }
+    }
+}
+    }
+    
     const uiShowButton = ref('Closed Announcements')
 
     const changeView = async() => {
-        
         showUserAllAnnouncement.length = 0 
         mode.setUishow()
         if(mode.checkUishow === true){
@@ -86,6 +102,7 @@ const propsMode = ref('active')
             mode.getSetMode('close')
             // await allUserAnnouncement(mode.setMode)
             await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+            await chcekModeButton()
             if(mode.setMode === 'close'){
                 uiShowButton.value = 'Active Announcements'
             }
@@ -96,6 +113,7 @@ const propsMode = ref('active')
             mode.getSetMode('active')
             // await allUserAnnouncement(mode.setMode)
             await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+            await chcekModeButton()
             if(mode.setMode === 'active'){
                 uiShowButton.value = 'Closed Announcements'
             }
@@ -106,7 +124,7 @@ const propsMode = ref('active')
     const disableNext = ref(false)
     const activeButton = ref(null)
 
-    const getId = async(e,num) => {
+    const getId = async(num) => {
         mode.setGetPage(num-1)
         showUserAllAnnouncement.length = 0 
         await getPageAnnouncement(mode.setMode,mode.getPageNumber)
@@ -212,10 +230,10 @@ const checkButtonPage = async(x,y) => {
                 </tbody>
                 </table>
                 <div class="flex justify-start mt-5" v-if="getTotal">
-                 <button class="w-20 mr-2 rounded-md border-gray-300 py-1 px-2" :disabled="!disablePrev" @click="prevPage">Prev</button>
-                 <button class="w-20 border-gray-300 py-1 px-2" 
-                 v-for="num in showButton" :key="num" @click="getId($event,num)" :class="{ 'bg-blue-500': activeButton === num }">{{ num }}</button>
-                 <button class="w-20 rounded-md border-gray-300 py-1 px-2" :disabled="disableNext" @click="nextPage">Next</button>   
+                 <button class="ann-page-prev w-20 mr-2 rounded-md border-gray-300 py-1 px-2" :disabled="!disablePrev" @click="prevPage">Prev</button>
+                 <button class="w-20 border-gray-300 py-1 px-2" :class="`ann-page-${index}`" 
+                 v-for="(num,index) in showButton" :key="num" @click="getId(num)">{{ num }}</button>
+                 <button class="ann-page-next w-20 rounded-md border-gray-300 py-1 px-2" :disabled="disableNext" @click="nextPage">Next</button>   
                </div>
         </div>
     </div>
