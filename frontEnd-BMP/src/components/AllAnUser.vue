@@ -231,8 +231,8 @@ const checkButtonPage = async(x,y) => {
                 </table>
                 <div class="flex justify-start mt-5 gap-x-2" v-if="getTotal">
                  <button class="ann-page-prev w-20 mr-2 rounded-md border-gray-300 py-1 px-2" :disabled="!disablePrev" @click="prevPage">Prev</button>
-                 <button class="w-20 border-gray-300 py-1 px-2" :class="[mode.getPageNumber === num-1 ? 'bg-[#24e78f] border-2 border-green-300 rounded-md text-black' :  'bg-red border-2 border-green-300 rounded-md',`ann-page-${num+1}`]" 
-                 v-for="num in showButton" :key="num" @click="getId(num)">{{ num }}</button>
+                 <button class="w-20 border-gray-300 py-1 px-2" :class="[mode.getPageNumber === num-1 ? 'bg-[#24e78f] border-2 border-green-300 rounded-md text-black' :  'bg-red border-2 border-green-300 rounded-md',`ann-page-${index}`]" 
+                 v-for="(num,index) in showButton" :key="num" @click="getId(num)">{{ num }}</button>
                  <button class="ann-page-next w-20 rounded-md border-gray-300 py-1 px-2" :disabled="disableNext" @click="nextPage">Next</button>   
                </div>
         </div>
