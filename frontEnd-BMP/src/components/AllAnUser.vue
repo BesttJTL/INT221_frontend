@@ -248,7 +248,7 @@ tr:hover{
     background-color:rgb(36, 231, 143,0.05) ;
     transition-duration: 200ms;
 }
-.num {
+/* .num {
     background-color:#24e78f;
-}
+} */
 </style>
