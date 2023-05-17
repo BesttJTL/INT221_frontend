@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onMounted, reactive, ref, watch} from 'vue';
+import { mergeProps, onBeforeMount, onMounted, reactive, ref, watch} from 'vue';
 import MakiDanger11Vue from './MakiDanger11.vue'
 import { getMode } from '../stores/getMode';
 const mode = getMode()
@@ -23,14 +23,13 @@ const propsMode = ref('active')
 
     onMounted(async() => {
         // await allUserAnnouncement(mode.setMode)
-        await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+        // await getPageAnnouncement(mode.setMode,mode.getPageNumber)
         if(mode.setMode === 'close'){
             uiShowButton.value = 'Active Announcements'
         }else {
             uiShowButton.value = 'Closed Announcements'
         }
         //fix
-        await chcekModeButton()
     })
 
     const showUserAllAnnouncement = reactive([])
@@ -56,7 +55,7 @@ const propsMode = ref('active')
         isFetch.value = true
         let textCategory = ''
         if(categoryId.value !== 0){
-            textCategory = `&category=${categoryId.value}`
+            textCategory = `&category=${mode.getCategory}`
         }
     
         const res = await fetch(`${fetchback}/api/announcements/pages?mode=${x}&page=${y}${textCategory}`)
@@ -106,6 +105,7 @@ const propsMode = ref('active')
             // await allUserAnnouncement('close')
             mode.getSetMode('close')
             // await allUserAnnouncement(mode.setMode)
+            mode.setGetPage(0)
             await getPageAnnouncement(mode.setMode,mode.getPageNumber)
             await chcekModeButton()
             if(mode.setMode === 'close'){
@@ -197,12 +197,19 @@ const prevPage = async() => {
     }
 
     onBeforeMount(async() => {
+        showUserAllAnnouncement.length = 0
         await getCategory()
+        categoryId.value = mode.getCategory
+        await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+        await chcekModeButton()
     })
 
     const selectCategory = async() => {
         showUserAllAnnouncement.length = 0
+        mode.setCategory(categoryId.value)
+        mode.setGetPage(0)
         await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+        await chcekModeButton()
     }
 </script>
  

@@ -7,6 +7,7 @@ export const getMode = defineStore('mode', () => {
     const checkUishow = useLocalStorage('uiShow', false)
     const getPageNumber = useLocalStorage('pageNumber', 0)
     const getCloseMode = useLocalStorage('closePage',0)
+    const getCategory = useLocalStorage('categoryId',0)
     const getSetMode = (X) => {
         setMode.value = X
     }
@@ -16,7 +17,10 @@ export const getMode = defineStore('mode', () => {
     const setGetPage = (X) => {
         getPageNumber.value = X
     }
-    return { setMode, getSetMode, checkUishow, setUishow, setGetPage, getPageNumber, getCloseMode }
+    const setCategory = (x) => {
+        getCategory.value = x
+    }
+    return { setMode, getSetMode, checkUishow, setUishow, setGetPage, getPageNumber, getCloseMode, getCategory, setCategory }
 })
 
 // if (import.meta.hot) {
