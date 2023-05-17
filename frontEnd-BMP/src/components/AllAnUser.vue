@@ -54,7 +54,12 @@ const propsMode = ref('active')
 
     const getPageAnnouncement = async(x,y) => {
         isFetch.value = true
-        const res = await fetch(`${fetchback}/api/announcements/pages?mode=${x}&page=${y}`)
+        let textCategory = ''
+        if(categoryId.value !== 0){
+            textCategory = `&category=${categoryId.value}`
+        }
+    
+        const res = await fetch(`${fetchback}/api/announcements/pages?mode=${x}&page=${y}${textCategory}`)
         try{
             if(res.ok){
                 const all = await res.json()
@@ -165,17 +170,40 @@ const prevPage = async() => {
       }
 }
 
-const showButton = reactive([])
+    const showButton = reactive([])
 
-const checkButtonPage = async(x,y) => {
-    showButton.length = 0
-    let num = 10 + y
-    for(let i = y+1 ; i <= x+y ; ++i){
-            if(i <= num){
-            showButton.push(i)
+    const checkButtonPage = async(x,y) => {
+        showButton.length = 0
+        let num = 10 + y
+        for(let i = y+1 ; i <= x+y ; ++i){
+                if(i <= num){
+                showButton.push(i)
+                }
             }
-        }
-}
+    }
+    const categoryId = ref(0)
+    const allcategory = reactive([])
+
+    const getCategory = async() => {
+            const res = await fetch(`${fetchback}/api/category`)
+            try{
+                const category = await res.json()
+                allcategory.push(...category)
+                
+            }
+            catch(err){
+                alert(err)
+            }
+    }
+
+    onBeforeMount(async() => {
+        await getCategory()
+    })
+
+    const selectCategory = async() => {
+        showUserAllAnnouncement.length = 0
+        await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+    }
 </script>
  
 <template>
@@ -194,12 +222,22 @@ const checkButtonPage = async(x,y) => {
             </div>
     </div>
     <div class="flex flex-row pt-5 px-2 w-full">  
-        <div class="w-1/2 flex flex-row justify-start">
+        <div class="w-1/2 flex flex-col justify-start space-y-3">
+            <div class="flex flex-row" >
             <p class="pl-3 text-md font-bold text-gray-300">Date/Time shown in Timezone : </p> 
             <p class="pl-1 text-md font-normal"> <span class="text-[#24BB78]">{{ timezone }}</span></p>
+            </div>
+            <div class="pl-3 text-md font-bold text-gray-300 flex flex-row space-x-3">
+                <p class="pt-1">Choose Category : </p>
+                <select class="ann-category-filter  px-4 py-2 border-2 border-gray-200 rounded-md text-sm font-normal flex justify-center text-center" 
+                v-model="categoryId" v-on:change="selectCategory">
+                        <option :value="0">ทั้งหมด</option> 
+                        <option v-for="showcat in allcategory" :key="showcat.categoryId" :value="showcat.categoryId">{{ showcat.categoryName }}</option> 
+                </select>
+            </div>
         </div>
         <div class="w-1/2 flex justify-end">
-            <button class="ann-button bg-transparent hover:bg-[#24e78f] text-[#24e78f] font-semibold hover:text-black py-2 px-4 border border-[#24e78f] hover:border-transparent rounded duration-200 mr-5" @click="changeView">
+            <button class="ann-button h-12 bg-transparent hover:bg-[#24e78f] text-[#24e78f] font-semibold hover:text-black py-2 px-2 border border-[#24e78f] hover:border-transparent rounded duration-200 mr-5" @click="changeView">
                     {{ uiShowButton }}
             </button>
         </div>
