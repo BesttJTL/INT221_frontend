@@ -22,9 +22,9 @@ const router = useRouter()
         }
 }
 
-    const title = ref()
+    const title = ref('')
     const category = ref(0)
-    const desc = ref()
+    const desc = ref('')
     const pdate = ref()
     const ptime = ref()
     const cdate = ref()
@@ -140,7 +140,21 @@ const router = useRouter()
         alert(err)
     }
 }
+//pbi12
+    const showNumtitle = ref(0)
+    const showErrortitle = ref(false)
+    const maxtitle = ref(200)
+    const checkTitle = () => {
+        const counttilte = title.value.trim()
+        if(counttilte.length >= 200){
+            showErrortitle.value = true
+        }else{
+             showErrortitle.value = false
+        }
+        showNumtitle.value = counttilte.length
+    }
 
+    const maxDesc = ref(10000)
 </script>
  
 <template>
@@ -149,15 +163,23 @@ const router = useRouter()
             <h1 class="flex text-5xl font-bold text-[#24e78f] pl-5 pt-10 text-sanfi">ANNOUNCEMENT DETAIL:</h1>
             <div class="p-5 space-y-1 ">
         
-                <p class="font-semibold">Title</p>
-                <input type="text" class="ann-title border-2 border-gray-200 rounded-md text-lg w-[70%] h-full p-2 font-normal" v-model="title">
+                <p class="font-semibold">
+                    Title
+                    <span class="text-white pl-3">{{ maxtitle - showNumtitle }}</span>
+                      <span class="text-red-400 pl-3" v-if="showErrortitle">ห้ามเกิน 200 ตัวอักษร</span>
+                </p>
+                <input type="text" class="ann-title border-2 border-gray-200 rounded-md text-lg w-[70%] h-full p-2 font-normal" v-model="title" v-on:keyup="checkTitle" :maxlength="maxtitle">
                 <p class="pt-3 font-semibold">Category</p>
                 <select class="ann-category w-1/3 h-full p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="category">
                         <option v-for="showcat in allcategory" :key="showcat.categoryId" :value="showcat.categoryId">{{ showcat.categoryName }}</option> 
                 </select>
         
-                <p class="pt-3 font-semibold">Description</p>
-                <textarea class="ann-description w-[70%] border-2 border-gray-200 rounded-md p-2 text-md font-normal h-48" v-model="desc"></textarea>
+                <p class="pt-3 font-semibold">
+                    Description
+                     <span class="text-white pl-3">{{ maxDesc - desc.trim().length }}</span>
+                      <span class="text-red-400 pl-3" v-if="desc.trim().length >= maxDesc">ห้ามเกิน 10,000 ตัวอักษร</span>
+                </p>
+                <textarea class="ann-description w-[70%] border-2 border-gray-200 rounded-md p-2 text-md font-normal h-48" v-model="desc" :maxlength="maxDesc"></textarea>
                 
                 <div class="flex flex-row space-x-3">
                     <p class="pt-3 font-semibold">Publish Date</p>

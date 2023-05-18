@@ -73,7 +73,8 @@ const router = useRouter()
 
         // pubDate.value = new Date(showOneDetail.value.publishDate).toLocaleDateString('en-CA', {dateStyle: "short"})
         // pubTime.value = new Date(showOneDetail.value.publishDate).toLocaleTimeString([],{ hour: "2-digit", minute: "2-digit" })
-
+        checkTitle()
+        checkDesc()
     })
 
     //pass
@@ -325,6 +326,21 @@ const router = useRouter()
     
 //   });
 // checkDataChanges()
+
+// pbi12
+    const maxtitle = ref(200)
+    const mintitle = ref(0)
+
+    const checkTitle = () => {
+        mintitle.value = vModelData.value.announcementTitle.trim().length
+    }
+
+    const maxDesc = ref(10000)
+    const minDesc = ref(0)
+    const checkDesc = () => {
+        minDesc.value = vModelData.value.announcementDescription.trim().length
+    }
+
 </script>
  
 <template>
@@ -332,14 +348,20 @@ const router = useRouter()
         <h1 class="flex text-3xl font-semibold p-5 ">Edit Announcement: </h1>
         <div class="flex flex-row p-5 ml-8 w-5/6 h-auto rounded-lg text-start">
         <div class="flex flex-col space-y-4 ">
-            <p>Title</p>
-            <input class="ann-title" type="text" v-model="vModelData.announcementTitle" v-on:input="fixdata" />
+            <p>Title       
+                <span class="text-white pl-3">{{ maxtitle - mintitle }}</span>
+                <span class="text-red-400 pl-3" v-if="mintitle >= maxtitle">ห้ามเกิน 200 ตัวอักษร</span> 
+            </p>
+            <input class="ann-title" type="text" v-model="vModelData.announcementTitle" v-on:input="fixdata" :maxlength="maxtitle" v-on:keydown="checkTitle"/>
             <p>Category</p>
             <select class="ann-category" v-model="categoryVmodel" v-on:change="fixdata">
                 <option v-for="showcat in allcategory" :key="showcat.categoryId" :value="showcat.categoryId">{{ showcat.categoryName }}</option> 
             </select>
-            <p>Description</p>
-            <textarea class="ann-description" v-model="vModelData.announcementDescription" v-on:input="fixdata"></textarea>
+            <p>Description
+                <span class="text-white pl-3">{{ maxDesc - minDesc }}</span>
+                <span class="text-red-400 pl-3" v-if="minDesc >= maxDesc">ห้ามเกิน 10,000 ตัวอักษร</span>
+            </p>
+            <textarea class="ann-description" v-model="vModelData.announcementDescription" v-on:input="fixdata" :maxlength="maxDesc" v-on:keydown="checkDesc"></textarea>
            <p class="mt-5">
             Publish Date  <p id="err" class="pt-3 font-normal text-red-400" v-show="showErrorpub">Please enter {{ displayErrorpub }}...</p>
            </p>
