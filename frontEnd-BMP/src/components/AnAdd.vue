@@ -133,7 +133,10 @@ const router = useRouter()
         }
         if(res.status === 400){
             const msg = await res.json()
-            alert(msg.message)
+            const text = msg.detail
+            for(let i = 0; i < msg.detail.length ; i++){
+                alert(`${text[i].field} = ${text[i].errorMessage}`)
+            }
         }
     }
     catch(err){

@@ -233,9 +233,18 @@ const router = useRouter()
          })
          if(res.ok){
           router.push(`/admin/announcement/${params.id}`)
-         } else {
+         } 
+         else if(res.status === 400){
+            const msg = await res.json()
+            const text = msg.detail
+            for(let i = 0; i < msg.detail.length ; i++){
+                alert(`${text[i].field} = ${text[i].errorMessage}`)
+            }
+        }
+         else {
           alert('Failed to update announcement')
          }
+
     }
 
 //     const checkDataChanges = () => {
