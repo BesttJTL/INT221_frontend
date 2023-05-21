@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, ref, watch, computed, onMounted } from 'vue';
+import { onBeforeMount, reactive, ref, watch, computed, onMounted,onUpdated } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 const fetchback = import.meta.env.VITE_ROOT_API
 const { params } = useRoute() 
@@ -18,6 +18,7 @@ const router = useRouter()
        showOneDetail.value =  await getOneAnnouncement()
     
 
+       
        //ถ้า User insertผ่าน /1111 จะไม่เจอ
        if(!showOneDetail.value){
             alert('The request page is not available')
@@ -75,8 +76,12 @@ const router = useRouter()
         // pubTime.value = new Date(showOneDetail.value.publishDate).toLocaleTimeString([],{ hour: "2-digit", minute: "2-digit" })
         checkTitle()
         checkDesc()
+        await validateTime()
     })
 
+    onUpdated(async() => {
+        await validateTime()
+    })
     //pass
     const getOneAnnouncement = async() => {
         const res = await fetch(`${fetchback}/api/announcements/${params.id}`)
@@ -120,20 +125,54 @@ const router = useRouter()
             showOneDetail.value.announcementDisplay = true
         }
     }
+
+    const isPubTimeDisabled = ref(false)
+    const isCloseTimeDisabled = ref(false)
     
-    //เช็คค่าขยับหรือไม่ เเละทำให้ปุ่ม on-off
-    const fixdata = () => {
-        //ไม่สามารถเข้าไปทำให้ categoryId เปลี่ยนได้จึงใช้วิธีนี้
-        // console.log('กดได้')
-        vModelData.value.categoryId = categoryVmodel.value
-        if(JSON.stringify(initialData.value) === JSON.stringify(vModelData.value)){
-            disableButton.value = true
-        } else if (initialData.value !== vModelData.value) {
-            disableButton.value = false
-        }
+    const validateTime = async() => {
+        isPubTimeDisabled.value = vModelData.value.pubDate === null ? true : false
+        isCloseTimeDisabled.value = vModelData.value.closeDate === null ? true : false
     }
 
 
+    //เช็คค่าขยับหรือไม่ เเละทำให้ปุ่ม on-off
+    const fixdata = () => {
+        vModelData.value.categoryId = categoryVmodel.value;
+        if (JSON.stringify(initialData.value) === JSON.stringify(vModelData.value)) {
+            disableButton.value = true;
+         } else {
+            disableButton.value = false;
+    };
+
+    const currentDate = new Date();
+    const publishDate = new Date(`${vModelData.value.pubDate} ${vModelData.value.pubTime}`);
+    const closeDate = new Date(`${vModelData.value.closeDate} ${vModelData.value.closeTime}`);
+
+        if (vModelData.value.pubDate && publishDate > currentDate) {
+            showErrorpub.value = true;
+            displayErrorpub.value = "Publish date should be earlier than or equal to the current date.";
+            disableButton.value = true;
+        } else {
+            showErrorpub.value = false;
+            if(vModelData.value.pubDate !== null){
+                isPubTimeDisabled.value = false;
+                vModelData.value.pubTime = '06:00'
+            }
+    }
+
+        if (vModelData.value.closeDate && currentDate >= closeDate) {
+            showErrorclose.value = true;
+            displayErrorclose.value = "Close date should be later than the current date.";
+            disableButton.value = true;
+        } else {
+            showErrorclose.value = false;
+            if(vModelData.value.closeDate !== null){
+                isCloseTimeDisabled.value = false;
+                vModelData.value.closeTime = '18:00'
+            }
+    }
+}
+        
     const truepub = ref(false)
     const trueclose = ref(false)
     const showErrorpub = ref(false)
@@ -153,35 +192,13 @@ const router = useRouter()
         setInsertFuc()
 
         //set display
-        if(vModelData.value.announcementDisplay === false){
-            vModelData.value.announcementDisplay = 'N'
-        }
-        else{
-            vModelData.value.announcementDisplay = 'Y'
-        }
+        vModelData.value.announcementDisplay = vModelData.value.announcementDisplay === false ? 'N' : 'Y';
     //    console.log(vModelData.value.announcementDisplay)
         
 
 
-        if(publishDateIso.value !== 'date' && publishDateIso.value !== 'time'){
-            truepub.value = true
-        }
-        else if(publishDateIso.value === null){
-            truepub.value = true
-        }
-        else{
-            truepub.value = false
-        }
-
-        if(closeDateIso.value !== 'date' && closeDateIso.value !== 'time'){
-            trueclose.value = true
-        }
-        else if(closeDateIso.value === null){
-            trueclose.value = true
-        }
-        else{
-            trueclose.value = false
-        }
+        truepub.value = publishDateIso.value !== 'date' && publishDateIso.value !== 'time';
+        trueclose.value = closeDateIso.value !== 'date' && closeDateIso.value !== 'time';
 
         if(truepub.value === true && trueclose.value === true){
           updateDetails()
@@ -350,6 +367,8 @@ const router = useRouter()
         minDesc.value = vModelData.value.announcementDescription.trim().length
     }
 
+    
+
 </script>
  
 <template>
@@ -376,14 +395,14 @@ const router = useRouter()
            </p>
             <div class="flex flex-row items-center">
                 <input class="ann-publish-date mr-2" type="date" v-model="vModelData.pubDate" v-on:change="fixdata"/>
-                <input class="ann-publish-time mr-2" type="time" v-model="vModelData.pubTime" v-on:change="fixdata"/>
+                <input class="ann-publish-time mr-2" type="time" v-model="vModelData.pubTime" v-on:change="fixdata" :disabled="isPubTimeDisabled" />
             </div>
             <p class="mt-5">
             Close Date   <p id="err" class="pt-3 font-normal text-red-400" v-show="showErrorclose">Please enter {{ displayErrorclose }}...</p>
            </p>
             <div class="flex flex-row items-center">
                 <input class="ann-close-date mr-2" type="date"  v-model="vModelData.closeDate" v-on:change="fixdata"/>
-                <input class="ann-close-time mr-2" type="time"  v-model="vModelData.closeTime" v-on:change="fixdata"/>
+                <input class="ann-close-time mr-2" type="time"  v-model="vModelData.closeTime" v-on:change="fixdata" :disabled="isCloseTimeDisabled" />
             </div>
             <p class="mt-5">
             Announcement Status
