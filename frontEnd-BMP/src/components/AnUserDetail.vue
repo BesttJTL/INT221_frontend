@@ -50,7 +50,7 @@ const router = useRouter()
                     <span class="ann-close-date pl-2 font-semibold text-gray-300">{{ new Date(showToUser.closeDate).toLocaleString("en-GB",{dateStyle: "medium", timeStyle: "short"})  }}</span>
                 </div>
             </div>
-            <p class="ann-description font-normal text-md">{{ showToUser.announcementDescription }}</p>
+            <p class="ann-description font-normal text-md" v-html="showToUser.announcementDescription"></p>
             <div>
             <router-link to="/announcement">
                 <button class="ann-button bg-transparent hover:bg-red-500 text-red-400 font-semibold hover:text-white py-2 px-4 border border-red-300 hover:border-transparent rounded-md duration-200">

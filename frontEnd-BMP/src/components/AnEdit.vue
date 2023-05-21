@@ -1,4 +1,5 @@
 <script setup>
+import { Quill, QuillEditor } from '@vueup/vue-quill';
 import { onBeforeMount, reactive, ref, watch, computed, onMounted,onUpdated } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 const fetchback = import.meta.env.VITE_ROOT_API
@@ -141,7 +142,13 @@ const router = useRouter()
         if (JSON.stringify(initialData.value) === JSON.stringify(vModelData.value)) {
             disableButton.value = true;
          } else {
-            disableButton.value = false;
+            //เช็คค่าถ้าเกิน 10000 ห้ามส่ง
+            if(minDesc.value > maxDesc.value){
+                disableButton.value = true;
+            }else{
+                disableButton.value = false;
+            }
+
     };
 
     const currentDate = new Date();
@@ -366,8 +373,8 @@ const router = useRouter()
     const checkDesc = () => {
         minDesc.value = vModelData.value.announcementDescription.trim().length
     }
-
     
+   
 
 </script>
  
@@ -380,16 +387,19 @@ const router = useRouter()
                 <span class="text-white pl-3">{{ maxtitle - mintitle }}</span>
                 <span class="text-red-400 pl-3" v-if="mintitle >= maxtitle">ห้ามเกิน 200 ตัวอักษร</span> 
             </p>
-            <input class="ann-title" type="text" v-model="vModelData.announcementTitle" v-on:input="fixdata" :maxlength="maxtitle" v-on:keydown="checkTitle"/>
+            <input class="ann-title w-1/2" type="text" v-model="vModelData.announcementTitle" v-on:input="fixdata" :maxlength="maxtitle" v-on:keydown="checkTitle"/>
             <p>Category</p>
-            <select class="ann-category" v-model="categoryVmodel" v-on:change="fixdata">
+            <select class="ann-category w-1/2" v-model="categoryVmodel" v-on:change="fixdata">
                 <option v-for="showcat in allcategory" :key="showcat.categoryId" :value="showcat.categoryId">{{ showcat.categoryName }}</option> 
             </select>
+            
             <p>Description
-                <span class="text-white pl-3">{{ maxDesc - minDesc }}</span>
-                <span class="text-red-400 pl-3" v-if="minDesc >= maxDesc">ห้ามเกิน 10,000 ตัวอักษร</span>
+                <span class="text-red-400 pl-3" v-if="minDesc > maxDesc">ห้ามเกิน 10,000 ตัวอักษร, ไม่งั้นจะส่งไม่ได้</span>
             </p>
-            <textarea class="ann-description" v-model="vModelData.announcementDescription" v-on:input="fixdata" :maxlength="maxDesc" v-on:keydown="checkDesc"></textarea>
+
+            <QuillEditor class="ann-description"  theme="snow" toolbar="full" contentType="html" v-model:content="vModelData.announcementDescription"
+             v-on:input="fixdata" :maxlength="maxDesc" v-on:keydown="checkDesc" />
+           
            <p class="mt-5">
             Publish Date  <p id="err" class="pt-3 font-normal text-red-400" v-show="showErrorpub">Please enter {{ displayErrorpub }}...</p>
            </p>
