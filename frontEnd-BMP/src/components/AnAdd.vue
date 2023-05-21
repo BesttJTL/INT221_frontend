@@ -158,6 +158,27 @@ const router = useRouter()
     }
 
     const maxDesc = ref(10000)
+
+    const validateTime = () => {
+        const currentDate = new Date();
+        const publishDate = setTimeFuc(pdate.value,ptime.value)
+        const closeDate = setTimeFuc(cdate.value,ctime.value)
+        
+
+        if (pdate.value && publishDate > currentDate.toISOString()) {
+            showErrorpub.value = true;
+            displayErrorpub.value = "Publish date should be earlier than or equal to the current date.";
+        } else {
+            showErrorpub.value = false;
+    }
+
+        if (cdate.value && currentDate >= closeDate) {
+            showErrorclose.value = true;
+            displayErrorclose.value = "Close date should be later than the current date.";
+        } else {
+            showErrorclose.value = false;
+    }
+    }
 </script>
  
 <template>
@@ -189,8 +210,8 @@ const router = useRouter()
                     <p id="err" class="pt-3 font-normal text-red-400" v-show="showErrorpub">Please enter {{ displayErrorpub }}...</p>
                 </div>  
                 <div class="space-x-5">
-                    <input type="date" class="ann-publish-date w-48 h-auto p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="pdate">
-                    <input type="time" class="ann-publish-time w-48 h-auto p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="ptime">
+                    <input type="date" class="ann-publish-date w-48 h-auto p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="pdate" v-on:change="validateTime">
+                    <input type="time" class="ann-publish-time w-48 h-auto p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="ptime" v-on:change="validateTime">
                 </div>
                 
                 <div class="flex flex-row space-x-3">
@@ -198,8 +219,8 @@ const router = useRouter()
                     <p id="err" class="pt-3 font-normal text-red-400" v-show="showErrorclose">Please enter {{ displayErrorclose }}...</p>
                 </div>  
                 <div class="space-x-5">
-                    <input type="date" class="ann-close-date w-48 h-auto p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="cdate">
-                    <input type="time" class="ann-close-time w-48 h-auto p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="ctime">
+                    <input type="date" class="ann-close-date w-48 h-auto p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="cdate" v-on:change="validateTime">
+                    <input type="time" class="ann-close-time w-48 h-auto p-2 border-2 border-gray-200 rounded-md text-md font-normal" v-model="ctime" v-on:change="validateTime">
                 </div>
                 <p class="pt-2 text-sm text-red-400">Note: The publish date and close date are optional. If you don't want to insert, consider leaving a blank.</p>
         
