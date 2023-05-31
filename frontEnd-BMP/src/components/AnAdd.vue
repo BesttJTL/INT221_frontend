@@ -140,7 +140,7 @@ const router = useRouter()
         }
     }
     catch(err){
-        alert(err)
+        alert(err) 
     }
 }
 //pbi12

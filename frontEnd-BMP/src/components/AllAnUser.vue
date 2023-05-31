@@ -7,6 +7,16 @@ const fetchback = import.meta.env.VITE_ROOT_API
 const isFetch = ref(true);
 const isFetchFailed = ref(false)
 const propsMode = ref('active')
+const showButton = reactive([])
+const categoryId = ref(0)
+const allcategory = reactive([])
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const showIndex = ref(0)
+const showUserAllAnnouncement = reactive([])
+const getTotal = ref(false)
+const getButton = ref(0)
+const uiShowButton = ref('Closed Announcements')
+
     // Fetching Timeout in 10 seconds (if exceed or more will hide)
     const fetchTimeout = () =>{
         setTimeout(() => {
@@ -18,12 +28,15 @@ const propsMode = ref('active')
     }
     fetchTimeout()
 
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const showIndex = ref(0)
+    onBeforeMount(async() => {
+        showUserAllAnnouncement.length = 0
+        await getCategory()
+        categoryId.value = mode.getCategory
+        await getPageAnnouncement(mode.setMode,mode.getPageNumber)
+        await chcekModeButton()
+    })
 
     onMounted(async() => {
-        // await allUserAnnouncement(mode.setMode)
-        // await getPageAnnouncement(mode.setMode,mode.getPageNumber)
         if(mode.setMode === 'close'){
             uiShowButton.value = 'Active Announcements'
         }else {
@@ -32,24 +45,6 @@ const propsMode = ref('active')
         //fix
     })
 
-    const showUserAllAnnouncement = reactive([])
-
-    // const allUserAnnouncement = async(x) => {
-    //     isFetch.value = true
-    //     const res = await fetch(`${fetchback}/api/announcements?mode=${x}`)
-    //     try{
-    //         if(res.ok){
-    //             const all = await res.json()
-    //             showUserAllAnnouncement.push(...all)
-    //             isFetch.value = false
-    //         }
-    //     }
-    //     catch(err){
-    //         alert(err)
-    //     }
-    // }
-    const getTotal = ref(false)
-    const getButton = ref(0)
 
     const getPageAnnouncement = async(x,y) => {
         isFetch.value = true
@@ -96,8 +91,6 @@ const propsMode = ref('active')
 }
     }
     
-    const uiShowButton = ref('Closed Announcements')
-
     const changeView = async() => {
         showUserAllAnnouncement.length = 0 
         mode.setUishow()
@@ -138,7 +131,7 @@ const propsMode = ref('active')
 
     watch(() => mode.getPageNumber, (x) => {
         if(x !== 0){
-            disablePrev.value = true
+            disablePrev.value = true // reverse binding :disabled="!disablePrev
         } else if(x === 0){
             disablePrev.value = false
         }
@@ -161,6 +154,17 @@ const propsMode = ref('active')
       }
 }
 
+const checkButtonPage = async(x,y) => {
+        showButton.length = 0
+        let num = 10 + y
+        for(let i = y+1 ; i <= num ; ++i){
+                // if(i <= num){
+                showButton.push(i)
+                // }
+            }
+    }
+
+
 const prevPage = async() => {
       mode.setGetPage(mode.getPageNumber-1)
       showUserAllAnnouncement.length = 0
@@ -170,19 +174,8 @@ const prevPage = async() => {
       }
 }
 
-    const showButton = reactive([])
 
-    const checkButtonPage = async(x,y) => {
-        showButton.length = 0
-        let num = 10 + y
-        for(let i = y+1 ; i <= x+y ; ++i){
-                if(i <= num){
-                showButton.push(i)
-                }
-            }
-    }
-    const categoryId = ref(0)
-    const allcategory = reactive([])
+
 
     const getCategory = async() => {
             const res = await fetch(`${fetchback}/api/category`)
@@ -196,13 +189,6 @@ const prevPage = async() => {
             }
     }
 
-    onBeforeMount(async() => {
-        showUserAllAnnouncement.length = 0
-        await getCategory()
-        categoryId.value = mode.getCategory
-        await getPageAnnouncement(mode.setMode,mode.getPageNumber)
-        await chcekModeButton()
-    })
 
     const selectCategory = async() => {
         showUserAllAnnouncement.length = 0

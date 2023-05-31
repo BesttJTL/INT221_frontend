@@ -13,7 +13,7 @@ const fetchback = import.meta.env.VITE_ROOT_API
             router.push('/admin/announcement')
             showOneDetail.value = []
         }
-    })
+    }) // before mount, fetch the announcement if the announcement does not exist, alert will shown.
     
     const getOneAnnouncement = async() => {
         const res = await fetch(`${fetchback}/api/announcements/${params.id}`)
@@ -26,11 +26,11 @@ const fetchback = import.meta.env.VITE_ROOT_API
         catch(err){
             alert(err)
         }
-    }
+    } // fetch each announcement by clicking on each announcement view button.
     
     const editAnnouncement = () => {
         router.push({ name: 'editDetail', params: { id: params.id }})
-    }
+    } // when clicking on edit button push the page to "/edit" page (with id)
     
 </script>
 

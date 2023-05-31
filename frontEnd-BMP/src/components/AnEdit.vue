@@ -6,7 +6,7 @@ const fetchback = import.meta.env.VITE_ROOT_API
 const { params } = useRoute() 
 const router = useRouter()
 
-    const showOneDetail = ref([])
+    const showOneDetail = ref([]) // json data of each announcement.
     const allcategory = reactive([])
     const categoryVmodel = ref(0)
     const publishDateIso = ref()
@@ -17,17 +17,12 @@ const router = useRouter()
 
     onBeforeMount(async()=> {
        showOneDetail.value =  await getOneAnnouncement()
-    
-
-       
-       //ถ้า User insertผ่าน /1111 จะไม่เจอ
        if(!showOneDetail.value){
             alert('The request page is not available')
             router.push('/admin/announcement')
             showOneDetail.value = []
-        }
+        } // before mount, fetch data and when user call not exist path, will show error alert.
 
-        //ถ้าไม่เท่ากับ null ให้เอา null ไปใช้ให้ user กรอก
         if(showOneDetail.value.publishDate !== null){
         showOneDetail.value.publishDate = await getDateTime(showOneDetail.value.publishDate)
         }
@@ -40,15 +35,15 @@ const router = useRouter()
         else{
             showOneDetail.value.closeDate= { date: null, time: null }
         }
+        //check close and publish date when fetch from backend. If not null, get it. If null, set as null
+
 
         //API GET เพื่อหา categoryall เเละเชื่อม v-model 
         await getCategory()
 
-        // console.log(showOneDetail.value.publishDate)
-
         //Set display
         await setDisplay()
-        // console.log(showOneDetail.value.announcementDisplay)
+
 
         vModelData.value = {
             announcementTitle: showOneDetail.value.announcementTitle,
@@ -59,8 +54,8 @@ const router = useRouter()
             closeTime: showOneDetail.value.closeDate.time,
             announcementDisplay: showOneDetail.value.announcementDisplay,
             categoryId: categoryVmodel.value
-        }
-        // console.log(vModelData.value)
+        } // data in input which has been tracked real-time.
+
         initialData.value = {
             announcementTitle: showOneDetail.value.announcementTitle,
             announcementDescription: showOneDetail.value.announcementDescription,
@@ -70,11 +65,9 @@ const router = useRouter()
             closeTime: showOneDetail.value.closeDate.time,
             announcementDisplay: showOneDetail.value.announcementDisplay,
             categoryId: categoryVmodel.value
-        }
+        } // initial/original data.
 
 
-        // pubDate.value = new Date(showOneDetail.value.publishDate).toLocaleDateString('en-CA', {dateStyle: "short"})
-        // pubTime.value = new Date(showOneDetail.value.publishDate).toLocaleTimeString([],{ hour: "2-digit", minute: "2-digit" })
         checkTitle()
         checkDesc()
         await validateTime()
@@ -83,6 +76,7 @@ const router = useRouter()
     onUpdated(async() => {
         await validateTime()
     })
+    
     //pass
     const getOneAnnouncement = async() => {
         const res = await fetch(`${fetchback}/api/announcements/${params.id}`)
@@ -188,11 +182,6 @@ const router = useRouter()
     const displayErrorclose = ref()
 
     const submitEdit = async() => {
-        // console.log('กดได้')
-        // console.log(categoryVmodel.value)
-        // console.log(typeof vModelData.value.pubDate)
-        // console.log(typeof vModelData.value.pubTime)
-
         publishDateIso.value = await setTimeFn(vModelData.value.pubDate,vModelData.value.pubTime)
         closeDateIso.value = await setTimeFn(vModelData.value.closeDate,vModelData.value.closeTime)
         
@@ -200,10 +189,6 @@ const router = useRouter()
 
         //set display
         vModelData.value.announcementDisplay = vModelData.value.announcementDisplay === false ? 'N' : 'Y';
-    //    console.log(vModelData.value.announcementDisplay)
-        
-
-
         truepub.value = publishDateIso.value !== 'date' && publishDateIso.value !== 'time';
         trueclose.value = closeDateIso.value !== 'date' && closeDateIso.value !== 'time';
 
@@ -271,95 +256,6 @@ const router = useRouter()
 
     }
 
-//     const checkDataChanges = () => {
-//   const checkStringChange = (newValue, initialValue) => {
-//     if (newValue.trim() !== initialValue.trim()) {
-//     return isDataChanged.value = true
-//   } else {
-//     return isDataChanged.value = false
-//   } 
-//   };
-
-//   watch(() => showOneDetail.value.announcementTitle, (newValue) => {
-//     checkStringChange(newValue, initialDetail.value.announcementTitle)
-//   })
-
-//   watch(() => showOneDetail.value.announcementDescription, (newValue) => {
-//     checkStringChange(newValue,initialDetail.value.announcementDescription)
-//   })
-
-//   watch(() => pubDate.value, (newValue)=>{
-//     checkStringChange(newValue,new Date(initialDetail.value.publishDate).toLocaleDateString('en-CA', {dateStyle: "short"}))
-//   })
-
-//   watch(() => pubTime.value, (newValue)=>{
-//     checkStringChange(newValue,new Date(initialDetail.value.publishDate).toLocaleTimeString('it-IT',{ hour: "2-digit", minute: "2-digit" }))
-//   })
-
-//   watch(() => closeDate.value, (newValue)=>{
-//     checkStringChange(newValue,new Date(initialDetail.value.closeDate).toLocaleDateString('en-CA', {dateStyle: "short"}))
-//   })
-
-//   watch(() => closeTime.value, (newValue)=>{
-//     checkStringChange(newValue,new Date(initialDetail.value.closeDate).toLocaleTimeString('it-IT',{ hour: "2-digit", minute: "2-digit" }))
-//   })
-
-//   watch(() => showOneDetail.value.announcementDisplay, (newValue)=> {
-//     const initialValue = initialDetail.value.announcementCategory.trim();
-// const categoryNameChanged = categoryVmodel.value && categoryVmodel.value.categoryName && !categoryVmodel.value.categoryName.trim().includes(initialValue);
-// const titleChanged = checkStringChange(showOneDetail.value.announcementTitle.trim(), initialDetail.value.announcementTitle.trim())
-// const descriptionChanged = checkStringChange(showOneDetail.value.announcementDescription, initialDetail.value.announcementDescription);
-// const pubDateChanged = checkStringChange(pubDate.value, new Date(initialDetail.value.publishDate).toLocaleDateString('en-CA', { dateStyle: "short" }));
-// const pubTimeChanged = checkStringChange(pubTime.value, new Date(initialDetail.value.publishDate).toLocaleTimeString('it-IT', { hour: "2-digit", minute: "2-digit" }));
-// const closeDateChanged = checkStringChange(closeDate.value, new Date(initialDetail.value.closeDate).toLocaleDateString('en-CA', { dateStyle: "short" }));
-// const closeTimeChanged = checkStringChange(closeTime.value, new Date(initialDetail.value.closeDate).toLocaleTimeString('it-IT', { hour: "2-digit", minute: "2-digit" }));
-// const announcementDisplayChanged = checkStringChange(newValue, initialDetail.value.announcementDisplay);
-
-// if (titleChanged || categoryNameChanged || descriptionChanged || pubDateChanged || pubTimeChanged || closeDateChanged || closeTimeChanged || announcementDisplayChanged) {
-// isDataChanged.value = true;
-// } else {
-// isDataChanged.value = false;
-// }
-// })
-
-
-//   watch([() => showOneDetail.value.announcementTitle, 
-//          () => categoryVmodel.value,
-//          () => showOneDetail.value.announcementDescription,
-//          () => pubDate.value,
-//          () => pubTime.value,
-//          () => closeDate.value,
-//          () => closeTime.value,
-//          () => showOneDetail.value.announcementDisplay], ([title,newValue,des,pD,pT,cD,cT,display]) => {
-// const initialValue = initialDetail.value.announcementCategory.trim();
-// const categoryNameChanged = newValue && newValue.categoryName && !newValue.categoryName.trim().includes(initialValue);
-// const titleChanged = checkStringChange(title.trim(), initialDetail.value.announcementTitle.trim())
-// const descriptionChanged = checkStringChange(des, initialDetail.value.announcementDescription);
-// const pubDateChanged = checkStringChange(pD, new Date(initialDetail.value.publishDate).toLocaleDateString('en-CA', { dateStyle: "short" }));
-// const pubTimeChanged = checkStringChange(pT, new Date(initialDetail.value.publishDate).toLocaleTimeString('it-IT', { hour: "2-digit", minute: "2-digit" }));
-// const closeDateChanged = checkStringChange(cD, new Date(initialDetail.value.closeDate).toLocaleDateString('en-CA', { dateStyle: "short" }));
-// const closeTimeChanged = checkStringChange(cT, new Date(initialDetail.value.closeDate).toLocaleTimeString('it-IT', { hour: "2-digit", minute: "2-digit" }));
-// const announcementDisplayChanged = checkStringChange(display, initialDetail.value.announcementDisplay);
-// console.log(titleChanged)
-// console.log(categoryNameChanged)
-// if (titleChanged || categoryNameChanged || descriptionChanged || pubDateChanged || pubTimeChanged || closeDateChanged || closeTimeChanged || announcementDisplayChanged) {
-// isDataChanged.value = true;
-// } else {
-// isDataChanged.value = false;
-// }
-// })
-
-// };
-
-// watch(isDataChanged, (newValue) => {
-//     console.log(newValue)
-//     if(newValue === true){
-//         disableButton.value = false
-//     }
-    
-//   });
-// checkDataChanges()
-
 // pbi12
     const maxtitle = ref(200)
     const mintitle = ref(0)
@@ -417,10 +313,6 @@ const router = useRouter()
             <p class="mt-5">
             Announcement Status
            </p>
-            <!-- <select class="ann-display" v-model="vModelData.announcementDisplay" v-on:change="fixdata">
-                <option value="N">N</option>
-                <option value="Y">Y</option>
-            </select> -->
             <div class="flex gap-x-2 pt-3">
                     <input type="checkbox" checked="checked" class="checkbox checkbox-success ann-display " v-model="vModelData.announcementDisplay" v-on:change="fixdata" />
                     <span class="label-text text-white mt-2 ml-3">Checked a checkbox to display an announcement</span> 

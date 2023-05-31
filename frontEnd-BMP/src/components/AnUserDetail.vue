@@ -12,8 +12,6 @@ const router = useRouter()
 
     onBeforeMount(async() => {
         showToUser.value = await getUserDetail(mode.setMode)
-        // console.log(showToUser.value)
-        
     })
 
     const getUserDetail = async(x) => {
